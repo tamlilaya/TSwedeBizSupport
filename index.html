@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TSwede Biz Team Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{--bg:#140b10;--panel:#1d131a;--line:#2e2229;--tx:#f5ece6;--mu:#9a8c93;--pk:#e8337a;--btn:#c8185a;--gold:#d9b45a;--in:#120a0e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#efe5da;--panel:#f8f1e9;--line:#dccdbd;--tx:#2b1b20;--mu:#7b6a66;--in:#f2e9de;--pk:#b3164d;--btn:#b3164d;--gold:#8a6a1c}}
+:root[data-theme="light"]{--bg:#efe5da;--panel:#f8f1e9;--line:#dccdbd;--tx:#2b1b20;--mu:#7b6a66;--in:#f2e9de;--pk:#b3164d;--btn:#b3164d;--gold:#8a6a1c}
+@media(min-width:700px){html{zoom:.8}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:radial-gradient(900px 420px at 50% -80px,color-mix(in srgb,var(--pk) 9%,transparent),transparent) no-repeat,var(--bg);color:var(--tx);font:15px/1.5 'Archivo',system-ui,sans-serif}
+header{display:flex;align-items:center;gap:24px;padding:18px 32px;border-bottom:1px solid var(--line);flex-wrap:wrap;background:color-mix(in srgb,var(--panel) 55%,transparent);backdrop-filter:blur(8px)}
+.logo{font:600 26px 'Playfair Display',Georgia,serif}.logo span{color:var(--pk)}
+nav{display:flex;gap:6px;flex:1;flex-wrap:wrap}
+nav button{background:none;border:0;color:var(--mu);font:500 15px 'Archivo',sans-serif;padding:8px 14px;cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.02em}
+nav button.on,nav button:hover{color:var(--tx);border-color:var(--pk)}
+main{max-width:1180px;margin:0 auto;padding:40px 32px 60px}
+.eye{color:var(--gold);letter-spacing:.2em;text-transform:uppercase;font-weight:600;font-size:12px;display:flex;justify-content:center;margin:0 0 12px}
+h1{font:600 clamp(34px,5vw,56px)/1.05 'Playfair Display',Georgia,serif;margin:0 0 28px;text-align:center}
+h1 em{color:var(--pk);font-style:italic}
+h2.h2{font:600 22px 'Playfair Display',Georgia,serif;margin:36px 0 12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px;box-shadow:0 1px 2px rgba(60,30,20,.06),0 10px 30px rgba(60,30,20,.08)}
+.glow{border-color:color-mix(in srgb,var(--pk) 45%,var(--line));box-shadow:0 0 0 1px color-mix(in srgb,var(--pk) 16%,transparent),0 0 36px color-mix(in srgb,var(--pk) 24%,transparent),0 0 110px color-mix(in srgb,var(--pk) 14%,transparent)}
+.muted{color:var(--mu)}
+.btn{background:var(--btn);color:#fff;border:0;border-radius:4px;padding:11px 20px;font:600 14px 'Archivo',sans-serif;cursor:pointer;letter-spacing:.02em;box-shadow:0 2px 10px color-mix(in srgb,var(--btn) 28%,transparent)}
+.btn:hover{filter:brightness(1.1)}
+.btn:disabled{opacity:.5;cursor:not-allowed;filter:none}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--tx);box-shadow:none}.btn.ghost:hover{border-color:var(--pk)}
+.btn.sm{padding:7px 12px;font-size:13px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:20px 0 14px}.bar .sp{flex:1}
+.clock{max-width:460px;text-align:center;margin:0 auto}.big{font:600 56px 'Playfair Display',Georgia,serif}
+.clock input{width:100%;margin:0 0 12px}
+.clock .row{display:flex;gap:10px;justify-content:center}
+input,select,textarea{background:var(--in);color:var(--tx);border:1px solid var(--line);border-radius:4px;padding:9px 10px;font:14px 'Archivo',sans-serif;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pk);box-shadow:0 0 0 3px color-mix(in srgb,var(--pk) 16%,transparent)}
+textarea{resize:vertical;min-height:44px}
+.ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tz{width:auto;max-width:170px;padding:7px 8px;font-size:13px}.chip{color:var(--gold);font-weight:600;font-size:13px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal .h{color:var(--mu);font-size:11px;letter-spacing:.15em;text-transform:uppercase;text-align:center;padding:4px 0}
+.d{min-height:62px;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--tx);text-align:left;padding:6px 8px;cursor:pointer;font:500 13px 'Archivo',sans-serif;display:flex;flex-direction:column;justify-content:space-between;transition:.15s}
+.d:hover{border-color:var(--pk);transform:translateY(-1px)}.d.on{border-color:var(--pk);background:color-mix(in srgb,var(--pk) 14%,var(--panel))}
+.d.t b{color:var(--pk)}.d i{font-style:normal;font-size:11px;color:var(--gold)}.d.x{visibility:hidden}
+.ttl{display:flex;align-items:center;gap:10px}.ttl h2{font:600 24px 'Playfair Display',Georgia,serif;margin:0;min-width:190px;text-align:center}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th{color:var(--mu);font-size:11px;letter-spacing:.15em;text-transform:uppercase;text-align:left;padding:10px 6px;border-bottom:1px solid var(--line)}
+td{padding:6px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:hover td{background:color-mix(in srgb,var(--pk) 5%,transparent)}
+td button,.x1{background:none;border:0;color:var(--mu);cursor:pointer;font-size:18px}td button:hover,.x1:hover{color:var(--pk)}
+td button.btn{font-size:13px;color:var(--tx)}
+.empty{text-align:center;color:var(--mu);padding:30px}
+#cap{padding:10px;background:var(--bg)}
+.lkf{display:grid;grid-template-columns:1fr 2fr;gap:8px}@media(max-width:600px){.lkf{grid-template-columns:1fr}}
+.lk b a{color:var(--pk);text-decoration:none;font-size:15px}.lk b a:hover{text-decoration:underline}.lkb{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.emb{width:100%;height:380px;border:1px solid var(--line);border-radius:8px;margin-top:10px;background:#fff}
+.ws{display:flex;gap:4px;flex-wrap:wrap;margin:18px 0 0;border-bottom:1px solid var(--line)}
+.ws button{background:var(--panel);color:var(--mu);border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;padding:9px 16px;font:600 13px 'Archivo',sans-serif;cursor:pointer;margin-bottom:-1px}
+.ws button.on{color:var(--tx);background:var(--bg);border-color:var(--pk);box-shadow:inset 0 2px 0 var(--pk)}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:14px 0 6px}
+.sc{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.sc small{display:block;color:var(--mu);font-size:10px;letter-spacing:.15em;text-transform:uppercase}
+.sc b{display:block;font:600 22px 'Playfair Display',Georgia,serif;margin:2px 0}.sc span{font-size:12px;color:var(--mu)}
+.tks{min-width:230px}.tk{display:flex;gap:6px;align-items:center;margin-bottom:5px}.tk input[type=checkbox]{width:auto;flex:none}.tk input.dn{text-decoration:line-through;color:var(--mu)}
+td .rsp{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+td .rb{border:1px solid var(--line);border-radius:999px;padding:3px 9px;font:600 11px 'Archivo',sans-serif;color:var(--mu)}
+td .rb.on{background:var(--pk);border-color:var(--pk);color:#fff}td .rb:disabled{opacity:.55;cursor:default}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.nc{padding:16px}.nc b{color:var(--gold)}.nc p{margin:6px 0 0;white-space:pre-wrap}
+.nl{padding:14px 0;border-bottom:1px solid var(--line)}.nl p{margin:4px 0 0;white-space:pre-wrap}
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:18px 0 0}
+.tip{display:flex;gap:12px;align-items:flex-start;background:color-mix(in srgb,var(--panel) 70%,transparent);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.tip i{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--pk) 13%,transparent);border:1px solid color-mix(in srgb,var(--pk) 35%,var(--line));color:var(--pk)}
+.tip b{display:block;font-size:13px;color:var(--tx);margin-bottom:2px}
+.tip span{font-size:12.5px;color:var(--mu);line-height:1.45}
+/* toast + collaboration room */
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--btn);color:#fff;padding:11px 20px;border-radius:999px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.35);max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.pb{height:6px;background:var(--in);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-top:10px}
+.pb i{display:block;height:100%;background:linear-gradient(90deg,var(--pk),var(--gold));border-radius:999px}
+.cl{list-style:none;margin:10px 0 0;padding:0;font-size:14px}
+.cl li{display:flex;gap:8px;padding:2px 0}.cl li.dn{color:var(--mu);text-decoration:line-through}.cl li span{flex:none;color:var(--gold)}
+.ch{font:600 18px 'Playfair Display',Georgia,serif;margin:6px 0 4px;display:flex;gap:8px;align-items:center}
+.cc{display:flex;flex-direction:column}.cc .lkb{margin-top:auto;padding-top:10px}
+/* sign-in extras */
+.hint{font-size:12px;color:var(--mu);margin:-6px 0 12px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--in);border:1px solid var(--line);border-radius:8px;padding:4px;margin:0 0 16px}
+.seg button{background:none;border:0;color:var(--mu);font:600 14px 'Archivo',sans-serif;padding:9px;border-radius:5px;cursor:pointer}
+.seg button.on{background:var(--btn);color:#fff}
+.pw{position:relative;margin:0 0 12px}.pw input{margin:0 !important;padding-right:46px}
+.eyeb{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--mu);cursor:pointer;padding:7px;display:flex;border-radius:4px}.eyeb:hover{color:var(--pk)}
+/* verify screen */
+.vf{max-width:520px;margin:0 auto;text-align:center;padding:38px 30px}
+.vf .ic{width:88px;height:88px;margin:0 auto 20px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--pk) 14%,transparent);border:1px solid color-mix(in srgb,var(--pk) 45%,var(--line));color:var(--pk);animation:pulse 2.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 28px color-mix(in srgb,var(--pk) 26%,transparent)}50%{box-shadow:0 0 58px color-mix(in srgb,var(--pk) 46%,transparent)}}
+.pill{display:inline-block;background:var(--in);border:1px solid var(--line);border-radius:999px;padding:7px 18px;font-weight:600;margin:8px 0 24px;word-break:break-all}
+.steps{list-style:none;margin:0 0 26px;padding:0;text-align:left;display:grid;gap:10px}
+.steps li{display:flex;gap:12px;align-items:flex-start;background:var(--in);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.steps b{flex:none;width:24px;height:24px;border-radius:50%;background:var(--btn);color:#fff;display:grid;place-items:center;font-size:12px}
+.vf .row{flex-wrap:wrap}
+.live{display:inline-flex;gap:8px;align-items:center;color:var(--mu);font-size:13px;margin:0}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.2}}
+/* admin: employee IDs */
+.addf{display:grid;grid-template-columns:2fr 2fr 1fr 2fr auto;gap:8px;align-items:center;margin-bottom:16px}
+.eid{letter-spacing:.06em}
+.tag{font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);color:var(--mu);white-space:nowrap}
+.tag.ok{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
+@media(max-width:640px){header,main{padding-left:16px;padding-right:16px}.d{min-height:48px;padding:4px}.addf{grid-template-columns:1fr}.vf{padding:30px 18px}}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">TSwede<span>Biz</span></div>
+<nav id="nav"></nav>
+<div class="ctl"><select id="tz" class="tz" title="Time zone" onchange="setTz(this.value)"></select><span id="who2" class="chip"></span><button class="btn ghost sm" id="so" onclick="signOut()">Sign out</button><button class="btn ghost sm" onclick="toggleTheme()" title="Dark / light">◐</button><button class="btn ghost sm" id="mu" onclick="musicBtn()" title="Background music: upload a file, then play / pause">♪</button><input type="range" id="mv" min="0" max="1" step="0.05" value="0.5" title="Volume" oninput="musicVol(this.value)" style="display:none;width:64px;padding:0"></div>
+</header>
+<main id="main"></main>
+<div id="toast" class="toast"></div>
+<input type="file" id="file" accept=".csv,.xlsx,.xls" hidden>
+<input type="file" id="mf" accept="audio/*" hidden>
+<script>
+/* ====== SETUP: paste your Firebase settings and your admin email(s) ====== */
+const CFG={apiKey:"AIzaSyDJhBnLK2t4ZKM7ReFlKTluBfHcbL-zW1M",authDomain:"tswede-team.firebaseapp.com",projectId:"tswede-team",storageBucket:"tswede-team.firebasestorage.app",messagingSenderId:"1063796002317",appId:"1:1063796002317:web:d5c3149b60b4a36da98f44"};
+const APPROVER_EMAILS=["contact@tswedebiz.com","contact@icewhisper.com","tracy@tracyjhoffman.com","josievoxmalaya@gmail.com"]; /* only these can approve in the Collab tab; must match isApprover() in firestore.rules */
+const ADMIN_EMAILS=["contact@tswedebiz.com","contact@icewhisper.com","tracy@tracyjhoffman.com","tamlilayawrites@gmail.com","josievoxmalaya@gmail.com"]; /* lowercase; must match firestore.rules */
+/* ======================================================================== */
+const CONFIGURED=CFG.apiKey!=="PASTE";
+/* Employee ID prefix */
+const BIZ='TSB';
+const DEPTS=[['01','Operations'],['02','Marketing & Content'],['03','Admin & Finance'],['00','Admin / Owner']];
+const STARTERS=['Ms. Tracy','Ms. Sonia','Ms. Josie'];
+const ICON=(p)=>`<svg width="__W__" height="__W__" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const EYE=ICON('<path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/>').replace(/__W__/g,20);
+const EYEOFF=ICON('<path d="M17.9 17.9A10.7 10.7 0 0 1 12 19C5.5 19 1.5 12 1.5 12a19 19 0 0 1 4.6-5.4M9.9 5.2A10 10 0 0 1 12 5c6.5 0 10.5 7 10.5 7a19 19 0 0 1-2.2 3.2"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2M1 1l22 22"/>').replace(/__W__/g,20);
+const MAIL=ICON('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>').replace(/__W__/g,38);
+const TIP=(ic,t,d)=>`<div class="tip"><i>${ic}</i><div><b>${t}</b><span>${d}</span></div></div>`;
+const I_LOCK=ICON('<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>').replace(/__W__/g,16),
+ I_OK=ICON('<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>').replace(/__W__/g,16),
+ I_UP=ICON('<path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/>').replace(/__W__/g,16),
+ I_EYE=ICON('<path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/>').replace(/__W__/g,16);
+const TIPS=`<div class="tips">${TIP(I_LOCK,'Private to you','Only you can see this workspace.')}${TIP(I_OK,'Saves as you type','Press Save progress to save everything right now.')}${TIP(I_UP,'Share when ready','Press Share on a row to send it to the Collab tab for approval.')}</div>`;
+let fa,db,FBFAIL=false;
+/* Loads the Firebase "compat" scripts (global `firebase`), trying three CDNs in turn */
+function loadFb(){const names=['app','auth','firestore'],bases=['https://www.gstatic.com/firebasejs/10.12.2/firebase-%-compat.js','https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-%-compat.js','https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-%-compat.min.js'];
+ const one=u=>new Promise((ok,no)=>{const x=document.createElement('script');x.src=u;x.onload=ok;x.onerror=no;document.head.appendChild(x)});
+ return(async()=>{for(const b of bases){try{for(const n of names)await one(b.replace('%',n));if(window.firebase&&firebase.auth&&firebase.firestore)return true}catch(e){}}return false})()}
+const $=s=>document.querySelector(s);
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const PEOPLE=['Ms. Tracy','Ms. Sonia','Ms. Josie'];
+const SETS={
+ plan:{label:'Planner',cols:[['date','Date','date'],['targets','Targets','tasks',null,['target']],['links','Link Bank','text',null,['willlinksbank','links']],['remarks','Remarks','text']]},
+ ice:{label:'Ice Whispers',cols:[['date','Date','date'],['type','Type','sel',['Social post','Reel','Story','Carousel','Live reading','Prospect','Follow-up','Blog / Article','Email / Newsletter','Ad / Campaign','Video','Meeting / Call','Research','Design / Graphics','Admin','Others']],['content','Target / Task','tasks',null,['topic','target','task','topiccontentprospect']],['platform','Platform','sel',['Instagram','Facebook','TikTok','YouTube','LinkedIn','Other']],['status','Status','sel',['Idea','Drafted','Scheduled','Posted','Done']],['notes','Notes','text'],['person','Key Person','key',[...PEOPLE,'Unassigned']]]}
+};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+let TZ=LS.get('tsw_tz',Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC');
+const TZS=[...new Set(['Asia/Manila','Europe/Stockholm','Europe/Warsaw',TZ,...(Intl.supportedValuesOf?Intl.supportedValuesOf('timeZone'):[])])];
+const dIn=(d,z)=>new Date(d).toLocaleDateString('en-CA',{timeZone:z||TZ});
+const today=()=>dIn(new Date());
+const fmtT=(d,z)=>new Date(d).toLocaleTimeString([],{hour:'numeric',minute:'2-digit',timeZone:z||TZ});
+const fmtDT=(d)=>new Date(d).toLocaleString([],{timeZone:TZ,month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+/* time-zone helpers: wall-clock text in a zone <-> real instant */
+function tzOff(ms,z){const p=new Intl.DateTimeFormat('en-US',{timeZone:z,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}).formatToParts(new Date(ms)).reduce((a,x)=>(a[x.type]=x.value,a),{});return Date.UTC(+p.year,+p.month-1,+p.day,+p.hour%24,+p.minute,+p.second)-Math.floor(ms/1000)*1000}
+function fromZone(str,z){const m=/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/.exec(String(str||'').trim());if(!m)return null;const g=Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5]);let t=g-tzOff(g,z);t=g-tzOff(t,z);const d=new Date(t);return isNaN(d)?null:d}
+const wall=(iso,z)=>{const ms=new Date(iso).getTime();return new Date(ms+tzOff(ms,z||TZ)).toISOString().slice(0,16).replace('T',' ')};
+const wallFrac=(iso)=>{const ms=new Date(iso).getTime(),w=ms+tzOff(ms,TZ);return (((w%864e5)+864e5)%864e5)/864e5};
+let S={plan:[],ice:[],notes:[],collab:[],att:[],myAtt:[],users:[],emps:[]},LOADED={},attUnsub=null,attMonth=today().slice(0,7),clkBusy=false,user=null,prof=null,tab='clock',cy=new Date().getFullYear(),cm=new Date().getMonth(),sel=null,mode='in',unsubs=[],listening=false,pending=false,imp='plan';
+let gate=false,authMsg='',lastE='',lastId='',rsUntil=0,role='emp',viewUid=null;
+const isAdmin=()=>!!user&&ADMIN_EMAILS.includes((user.email||'').toLowerCase());
+const isApprover=()=>!!user&&user.emailVerified&&APPROVER_EMAILS.includes((user.email||'').toLowerCase());
+const myName=()=>(prof&&prof.name)||(user&&(user.displayName||user.email))||'';
+const msg=t=>{const m=$('#msg');if(m)m.textContent=t};
+const setAM=t=>{authMsg=t;msg(t)};
+function setRole(r){const e=$('#ae'),i=$('#aid');if(e)lastE=e.value;if(i)lastId=i.value;role=r;authMsg='';render()}
+/* Planner / Ice Whispers are private: each person only ever sees their own rows. */
+const vu=()=>user&&user.uid;
+const own=r=>!!user&&r.uid===user.uid;
+const go=t=>{tab=t;sel=null;render()};
+const hrs=r=>r.out?((new Date(r.out)-new Date(r.in))/36e5).toFixed(2):'';
+
+/* ---------- render ---------- */
+function render(){
+ const ok=CONFIGURED&&user&&user.emailVerified;
+ if(!ok||(tab==='admin'&&!isAdmin()))tab=ok?tab:'clock';
+ if(tab==='admin'&&!isAdmin())tab='clock';
+ const tabs=ok?[['clock','Time Clock'],['plan','Planner'],['ice','Ice Whispers'],['notes','Collab'+(isApprover()&&S.collab.some(c=>c.stage!=='progress')?' <span class="tag ok">'+S.collab.filter(c=>c.stage!=='progress').length+'</span>':'')],...(isAdmin()?[['admin','Attendance']]:[])]:[];
+ $('#nav').innerHTML=tabs.map(t=>`<button class="${t[0]===tab?'on':''}" onclick="go('${t[0]}')">${t[1]}</button>`).join('');
+ $('#who2').textContent=user?myName():'';$('#so').style.display=user?'':'none';
+ const z=$('#tz');if(!z.options.length)z.innerHTML=TZS.map(x=>`<option value="${x}">${x.replace(/_/g,' ')}</option>`).join('');z.value=TZ;
+ const sy=scrollY,wx=[...document.querySelectorAll('#main .wrap')].map(w=>w.scrollLeft);
+ $('#main').innerHTML=!CONFIGURED?cfgHTML():FBFAIL?failHTML():!fa?'<p class="muted" style="text-align:center">Loading…</p>':!user?authHTML():!user.emailVerified?verifyHTML():tab==='clock'?clockHTML():tab==='admin'?adminHTML():tab==='notes'?notesHTML():planHTML(tab);
+ wx.forEach((x,i)=>{const w=document.querySelectorAll('#main .wrap')[i];if(w)w.scrollLeft=x});if(scrollY!==sy)scrollTo(0,sy);
+ tick();
+}
+const busy=a=>!!a&&((a.dataset&&a.dataset.f)||(a.closest&&a.closest('.tks'))||['nt','ll','lu','ln','en','ey','ed','em','fo','am'].includes(a.id));
+function redraw(){if(busy(document.activeElement)){pending=true;return}render()}
+document.addEventListener('focusout',()=>{if(pending)setTimeout(()=>{if(!busy(document.activeElement)){pending=false;render()}},60)});
+function tick(){const n=$('#now');if(n){const d=new Date();n.textContent=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit',second:'2-digit',timeZone:TZ});$('#dt').textContent=d.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric',year:'numeric',timeZone:TZ})+' · '+TZ.replace(/_/g,' ')}
+ const r=$('#rs');if(r){const l=Math.max(0,Math.ceil((rsUntil-Date.now())/1000));r.disabled=l>0;r.textContent=l>0?'Resend in '+l+'s':'Resend email'}}
+setInterval(tick,1000);
+/* while on the verify screen, quietly check every few seconds so the person is let in as soon as they click the link */
+setInterval(async()=>{if(fa&&user&&!user.emailVerified&&!gate){try{await user.reload();if(user.emailVerified)boot(fa.currentUser)}catch(e){}}},4000);
+
+/* ---------- screens before the app ---------- */
+function cfgHTML(){return `<p class="eye">Setup needed</p><h1>Almost <em>there</em>.</h1><div class="card clock glow"><p>Open <b>index.html</b> and paste your Firebase settings at the top of the script. Steps are in <b>SETUP.md</b>.</p></div>`}
+function failHTML(){return `<p class="eye">Connection problem</p><h1>Couldn’t load <em>Firebase</em>.</h1><div class="card clock glow"><p>The page could not download the Firebase scripts. Your network, an ad blocker, or the preview window may be blocking them. Open the file in a normal browser tab (Chrome, Safari, Edge) or from your GitHub Pages link, then refresh.</p><button class="btn" onclick="location.reload()">Try again</button></div>`}
+function authHTML(){const up=mode==='up';return `<p class="eye">Welcome</p><h1>Sign <em>in</em> to TSwede Biz.</h1>
+ <div class="card clock glow" style="text-align:left">
+ <div class="seg"><button class="${role==='emp'?'on':''}" onclick="setRole('emp')">Employee</button><button class="${role==='admin'?'on':''}" onclick="setRole('admin')">Admin</button></div>
+ <div class="bar" style="margin-top:0"><button class="btn sm${up?' ghost':''}" onclick="mode='in';authMsg='';render()">Sign in</button><button class="btn sm${up?'':' ghost'}" onclick="mode='up';authMsg='';render()">Create account</button></div>
+ <input id="aid" placeholder="Employee ID" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-transform:uppercase;letter-spacing:.06em" value="${esc(lastId)}">
+ ${role==='emp'?'<p class="hint">Your Employee ID is given to you by the admin.</p>':'<p class="hint">Admin accounts only.</p>'}
+ <input id="ae" type="email" placeholder="Email" autocomplete="email" value="${esc(lastE)}">
+ <div class="pw"><input id="ap" type="password" placeholder="Password (6+ characters)" onkeydown="if(event.key==='Enter')doAuth()"><button type="button" class="eyeb" aria-label="Show password" onclick="togglePw('ap',this)">${EYE}</button></div>
+ <button class="btn" onclick="doAuth()" style="width:100%">${up?'Create account':'Sign in'}</button>
+ <p id="msg" class="muted" style="text-align:center">${esc(authMsg)}</p>
+ ${up?'':'<p style="text-align:center;margin:0"><a href="#" class="muted" onclick="forgot();return false">Forgot password?</a></p>'}</div>`}
+function verifyHTML(){const l=Math.max(0,Math.ceil((rsUntil-Date.now())/1000));
+ return `<p class="eye">One step left</p><h1>Check your <em>inbox</em>.</h1>
+ <div class="card glow vf"><div class="ic">${MAIL}</div>
+ <p class="muted" style="margin:0">We sent a verification link to</p>
+ <div class="pill">${esc(user.email)}</div>
+ <ol class="steps"><li><b>1</b><span>Open the verification email. If you can’t see it, check <em>Spam</em> or <em>Promotions</em>.</span></li><li><b>2</b><span>Tap the link inside.</span></li><li><b>3</b><span>Come back to this page. You’ll be let in automatically.</span></li></ol>
+ <div class="row"><button class="btn" onclick="recheck()">I’ve verified</button><button class="btn ghost" id="rs" onclick="resend()"${l?' disabled':''}>${l?'Resend in '+l+'s':'Resend email'}</button></div>
+ <p id="msg" class="muted" style="min-height:22px;margin:14px 0 10px"></p>
+ <p class="live"><i></i>Waiting for verification…</p>
+ <p style="margin:14px 0 0"><a href="#" class="muted" onclick="signOut();return false">Use a different account</a></p></div>`}
+function togglePw(id,b){const i=$('#'+id),h=i.type==='password';i.type=h?'text':'password';b.innerHTML=h?EYEOFF:EYE;b.setAttribute('aria-label',h?'Hide password':'Show password')}
+
+/* Claims an Employee ID for this account. Fails if the ID doesn't exist or belongs to someone else. */
+async function claimId(id,u,adm){const ref=db.doc('employees/'+id);
+ return db.runTransaction(async t=>{const s=await t.get(ref);
+  if(!s.exists){/* first-time admin: a verified admin may register their own ID */
+   if(!(adm&&u.emailVerified&&/^[A-Z0-9]{8,20}$/.test(id)))throw 'none';
+   const si=STARTERS.findIndex((n,i)=>id===BIZ+'2025'+'01'+String(i+1).padStart(2,'0')),nm=si>=0?STARTERS[si]:(u.displayName||(u.email||'').split('@')[0]),now=new Date().toISOString();
+   t.set(ref,{name:nm,year:id.slice(3,7),dept:si>=0?'01':'00',uid:u.uid,email:u.email,claimedAt:now,created:now,invite:''});return{name:nm}}
+  const d=s.data();
+  if(d.uid&&d.uid!==u.uid)throw 'taken';
+  if(!d.uid&&d.invite&&d.invite!==(u.email||'').toLowerCase())throw 'mismatch';
+  if(!d.uid)t.update(ref,{uid:u.uid,email:u.email,claimedAt:new Date().toISOString()});
+  return d})}
+/* the Employee ID this account already holds (null if none, or if it can't be checked) */
+async function heldId(u){try{const q=await db.collection('employees').where('uid','==',u.uid).limit(1).get();return q.empty?null:q.docs[0].id}catch(e){return null}}
+async function doAuth(){
+ const e=$('#ae').value.trim(),p=$('#ap').value,id=($('#aid').value||'').toUpperCase().replace(/\s+/g,''),adm=ADMIN_EMAILS.includes(e.toLowerCase());
+ lastE=e;lastId=id;
+ if(!e||!p)return setAM('Please enter your email and password.');
+ if(role==='admin'&&!adm)return setAM('That email is not an admin account. Switch to Employee to sign in.');
+ if(!id)return setAM('Please enter your Employee ID.');
+ gate=true;let c=null,claimed=null;
+ try{
+  if(mode==='up'){
+   c=await fa.createUserWithEmailAndPassword(e,p);
+   const rec=role==='emp'?await claimId(id,c.user):null;if(rec)claimed=id;
+   await c.user.updateProfile({displayName:rec?rec.name:e.split('@')[0]});
+   await c.user.sendEmailVerification();rsUntil=Date.now()+45000}
+  else{
+   c=await fa.signInWithEmailAndPassword(e,p);
+   if(role==='emp'||c.user.emailVerified){const held=await heldId(c.user);if(held&&held!==id)throw 'other:'+held;const rec2=await claimId(id,c.user,role==='admin');if(rec2&&rec2.name&&rec2.name!==c.user.displayName){try{await c.user.updateProfile({displayName:rec2.name})}catch(_){}try{await db.doc('users/'+c.user.uid).update({name:rec2.name})}catch(_){}}}}
+  authMsg='';gate=false;await boot(fa.currentUser)
+ }catch(x){
+  const code=(x&&x.code)||'';
+  const m=x==='none'?'That Employee ID doesn’t exist. Please check with your admin.'
+   :x==='taken'?'That Employee ID already belongs to another account.'
+   :x==='mismatch'?'That Employee ID is reserved for a different email address. Use the email your admin registered.'
+   :(typeof x==='string'&&x.startsWith('other:'))?'This account already uses Employee ID '+x.slice(6)+'. Please use that ID.'
+   :code==='permission-denied'?'Could not check the Employee ID. Make sure the latest firestore.rules is published.'
+   :code==='auth/email-already-in-use'?'That email already has an account. Try signing in.'
+   :code==='auth/weak-password'?'Please use a longer password (6+ characters).'
+   :code==='auth/invalid-email'?'That email doesn’t look right.'
+   :code==='auth/too-many-requests'?'Too many tries. Please wait a moment.'
+   :mode==='up'?'Could not create the account. Please try again.'
+   :'Email, password or Employee ID is incorrect.';
+  if(mode==='up'&&claimed){try{await db.doc('employees/'+claimed).update({uid:'',email:''})}catch(_){}}
+  if(c&&c.user){try{if(mode==='up')await c.user.delete();else await fa.signOut()}catch(_){}}
+  gate=false;authMsg=m;user=null;render()}}
+async function forgot(){const e=$('#ae').value.trim();if(!e)return setAM('Type your email first.');try{await fa.sendPasswordResetEmail(e);setAM('Reset link sent. Check your inbox.')}catch(x){setAM('Could not send the reset email.')}}
+async function resend(){try{await user.sendEmailVerification();rsUntil=Date.now()+45000;msg('Sent again. Check your inbox.');tick()}catch(x){msg('Please wait a moment and try again.')}}
+async function recheck(){try{await user.reload()}catch(e){}
+ if(user&&!user.emailVerified)return msg('Not verified yet. Open the link in the email first.');
+ await boot(fa.currentUser)}
+function signOut(){fa.signOut()}
+function stop(){unsubs.forEach(f=>f());unsubs=[];if(attUnsub){attUnsub();attUnsub=null}listening=false;LOADED={};S={plan:[],ice:[],notes:[],collab:[],att:[],myAtt:[],users:[],emps:[]}}
+async function boot(u){stop();user=u;prof=null;viewUid=null;
+ if(u){try{await u.reload()}catch(e){}
+  if(u.emailVerified){try{const r=db.doc('users/'+u.uid);let s=await r.get();
+   if(!s.exists){await r.set({name:u.displayName||u.email,email:u.email,approved:true,created:new Date().toISOString()})}
+   unsubs.push(r.onSnapshot(d=>{prof=d.data()||null;if(!listening)listen();redraw()}))}catch(e){console.error(e)}}}
+ render()}
+function sub(q,k){unsubs.push(q.onSnapshot(s=>{S[k]=s.docs.map(d=>({id:d.id,...d.data()}));LOADED[k]=true;if(k==='collab')COLLABERR='';redraw()},e=>{console.error(k,e);if(k==='collab'){COLLABERR=e.code||e.message||'error';redraw()}}))}
+let COLLABERR='';
+function listen(){listening=true;{const q=n=>db.collection(n).where('uid','==',user.uid);sub(q('plan'),'plan');sub(q('ice'),'ice')}sub(db.collection('collab'),'collab');sub(db.collection('notes').orderBy('at','desc').limit(150),'notes');
+ sub(db.collection('attendance').where('uid','==',user.uid),'myAtt');if(isAdmin()){listenAtt();sub(db.collection('users'),'users');sub(db.collection('employees'),'emps')}}
+/* admin attendance log: one month at a time, so it stays fast as records grow */
+function listenAtt(){if(attUnsub){attUnsub();attUnsub=null}LOADED.att=false;
+ const a=fromZone(attMonth+'-01T00:00',TZ),[y,m]=attMonth.split('-').map(Number),b=fromZone((m===12?(y+1)+'-01':y+'-'+pad(m+1))+'-01T00:00',TZ);
+ if(!a||!b)return;
+ attUnsub=db.collection('attendance').where('in','>=',a.toISOString()).where('in','<',b.toISOString()).onSnapshot(q=>{S.att=q.docs.map(d=>({id:d.id,...d.data()}));LOADED.att=true;redraw()},e=>console.error('att',e))}
+function setAttMonth(v){if(!/^\d{4}-\d{2}$/.test(v))return;attMonth=v;listenAtt();render()}
+
+/* ---------- time clock ---------- */
+const STALE=16*36e5;
+const myOpen=()=>S.myAtt.filter(r=>!r.out).sort((a,b)=>b.in.localeCompare(a.in))[0];
+const isStale=r=>!!r&&Date.now()-new Date(r.in)>STALE;
+function clockHTML(){const o=myOpen(),st=isStale(o);
+ return `<p class="eye">Daily time record</p><h1>Clock <em>in</em>, clock out.</h1>
+ <div class="card clock"><div id="now" class="big"></div><div id="dt" class="muted"></div>
+ <p class="muted" style="margin:18px 0 14px">Signed in as <b style="color:var(--tx)">${esc(myName())}</b></p>
+ <div class="row"><button class="btn" onclick="clockIn()">Time In</button><button class="btn ghost" onclick="clockOut()">Time Out</button></div>
+ <p id="msg" class="muted">${o?'You are currently clocked in (since '+esc(fmtDT(o.in))+').':''}</p>
+ ${st?`<div style="margin-top:14px;text-align:left"><p class="hint" style="margin:0 0 8px">It looks like you forgot to clock out. Set your real time out (${esc(TZ.replace(/_/g,' '))}):</p><div class="row"><input id="fo" type="datetime-local" style="width:auto"><button class="btn sm" onclick="fixOut('${o.id}')">Set time out</button></div></div>`:''}
+ <p style="margin:14px 0 0"><button class="btn ghost sm" onclick="expo('mine','xlsx')">Download my record (Excel)</button></p></div>`}
+async function clockIn(){if(clkBusy)return;const o=myOpen();
+ if(o)return msg(isStale(o)?'You never clocked out on '+fmtDT(o.in)+'. Set your time out below first.':'You’re already clocked in.');
+ clkBusy=true;
+ try{const d=new Date();await db.collection('attendance').add({uid:user.uid,name:myName(),tz:TZ,in:d.toISOString(),out:'',outTz:''});msg('Clocked in at '+fmtT(d)+' ('+TZ.replace(/_/g,' ')+'). Have a lovely day.')}catch(e){msg('Could not save. Please try again.')}finally{clkBusy=false}}
+async function clockOut(){if(clkBusy)return;const r=myOpen();if(!r)return msg('No open time in found for you.');
+ if(isStale(r))return msg('That time in is from '+fmtDT(r.in)+'. Set your real time out below.');
+ clkBusy=true;
+ try{const d=new Date();await db.doc('attendance/'+r.id).update({out:d.toISOString(),outTz:TZ});msg('Clocked out at '+fmtT(d)+' ('+TZ.replace(/_/g,' ')+'). See you next time.')}catch(e){msg('Could not save. Please try again.')}finally{clkBusy=false}}
+async function fixOut(id){const r=S.myAtt.find(x=>x.id===id),el=$('#fo');if(!r||!el)return;
+ const d=fromZone(el.value,TZ),t0=new Date(r.in);
+ if(!d||d<=t0||d>new Date(Date.now()+6e4)||d-t0>24*36e5)return msg('Pick a time after your time in, within 24 hours of it, and not in the future.');
+ try{await db.doc('attendance/'+id).update({out:d.toISOString(),outTz:TZ});msg('Time out saved: '+fmtT(d)+'.')}catch(e){msg('Could not save. Please ask the admin to fix this record.')}}
+
+/* ---------- planner / ice whispers ---------- */
+function planHTML(k){
+ const S_=SETS[k],mk=cy+'-'+pad(cm+1),all=S[k].filter(own),counts={};all.forEach(r=>{if(r.date)counts[r.date]=(counts[r.date]||0)+1});
+ const rows=viewRows(k),vc=S_.cols.filter(c=>!c[5]);
+ const first=new Date(cy,cm,1).getDay(),dim=new Date(cy,cm+1,0).getDate();
+ let cal=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="h">${d}</div>`).join('')+'<div class="d x"></div>'.repeat(first);
+ for(let d=1;d<=dim;d++){const ds=mk+'-'+pad(d),c=counts[ds];
+  cal+=`<button class="d${ds===today()?' t':''}${ds===sel?' on':''}" onclick="pickDay('${ds}')"><b>${d}</b>${c?`<i>${c} item${c>1?'s':''}</i>`:'<i></i>'}</button>`}
+ const head=vc.map(c=>`<th>${c[1]}</th>`).join('')+'<th>Share</th><th></th>';
+ const body=rows.map(r=>`<tr>${vc.map(c=>`<td>${cell(k,r,c)}</td>`).join('')}<td>${shareCell(k,r)}</td><td><button title="Delete" onclick="delRow('${k}','${r.id}')">×</button></td></tr>`).join('')
+  ||`<tr><td colspan="${vc.length+2}" class="empty">Nothing planned${sel?' on this day':' this month'} yet. Add a row to begin.</td></tr>`;
+ const mname=new Date(cy,cm,1).toLocaleDateString([],{month:'long',year:'numeric'});
+ const h=k==='plan'?['Monthly planner','Know what to <em>focus on</em> next.']:['Ice Whispers','Plan the <em>whispers</em>, track the prospects.'];
+ return `<p class="eye">${h[0]}</p><h1>${h[1]}</h1>
+ <div class="bar"><div class="ttl"><button class="btn ghost sm" onclick="mv(-1)">←</button><h2>${mname}</h2><button class="btn ghost sm" onclick="mv(1)">→</button></div><span class="sp"></span><button class="btn ghost sm" onclick="nowMonth()">Today</button></div>
+ <div class="cal">${cal}</div>
+ <div class="bar" style="margin-top:34px"><span class="muted">${sel?'Showing '+sel:'Showing the whole month'}</span>${sel?'<button class="btn ghost sm" onclick="pickDay(null)">Show all</button>':''}<span class="sp"></span>
+  <button class="btn sm" onclick="saveWs('${k}')">Save progress</button>
+  <button class="btn ghost sm" onclick="addRow('${k}')">+ Add row</button>
+  <button class="btn ghost sm" onclick="pick('${k}')">Upload Excel</button>
+  <button class="btn ghost sm" onclick="expo('${k}','xlsx')">Download Excel</button>
+  <button class="btn ghost sm" onclick="expo('${k}','png')">PNG</button>
+  <button class="btn ghost sm" onclick="tmpl('${k}')">Excel template</button></div>
+ <div id="cap" class="card wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>
+ ${TIPS}`}
+function viewRows(k){const mk=cy+'-'+pad(cm+1);return S[k].filter(own).filter(r=>(r.date||'').slice(0,7)===mk&&(!sel||r.date===sel)).sort((a,b)=>(a.date||'').localeCompare(b.date||''))}
+function cell(k,r,c){const a=`data-k="${k}" data-id="${r.id}" data-f="${c[0]}"`,v=r[c[0]]??'';
+ if(c[2]==='date')return `<input type="date" ${a} value="${esc(v)}">`;
+ if(c[2]==='sel'){const o=c[3].includes(v)||!v?c[3]:[...c[3],v];return `<select ${a}>${o.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('')}</select>`+(c[0]==='type'&&v==='Others'?`<input ${a.replace('data-f="type"','data-f="typeOther"')} placeholder="Specify…" value="${esc(r.typeOther||'')}" style="margin-top:6px">`:'')}
+ if(c[2]==='tasks'){const it=tkParse(v),q=`'${k}','${r.id}'`;return `<div class="tks" data-r="${r.id}">${it.map((x,i)=>`<div class="tk"><input type="checkbox"${x.d?' checked':''} onchange="tkSet(${q},${i},'d',this.checked)"><input type="text" class="${x.d?'dn':''}" value="${esc(x.t)}" placeholder="Bullet…" oninput="tkSet(${q},${i},'t',this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();tkAdd(${q})}"><button title="Remove bullet" onclick="tkDel(${q},${i})">×</button></div>`).join('')}<button class="btn ghost sm" onclick="tkAdd(${q})">+ Bullet</button></div>`}
+ if(c[2]==='key'){const pv=v||'Unassigned',o=c[3].includes(pv)?c[3]:[...c[3],pv];return `<select ${a}>${o.map(x=>`<option${x===pv?' selected':''}>${esc(x)}</option>`).join('')}</select>`}
+ return `<textarea ${a} rows="2">${esc(v)}</textarea>`}
+const tm={};
+document.addEventListener('input',e=>upd(e.target,false));
+document.addEventListener('change',e=>upd(e.target,true));
+function upd(t,re){if(!t.dataset||!t.dataset.f)return;const k=t.dataset.k,r=S[k].find(x=>x.id===t.dataset.id);if(!r)return;const f=t.dataset.f,v=t.value;
+ r[f]=v;r.by=myName();clearTimeout(tm[r.id+f]);
+ tm[r.id+f]=setTimeout(()=>db.doc(k+'/'+r.id).set({[f]:v,by:myName(),upd:new Date().toISOString()},{merge:true}).then(()=>syncCollab(k,r.id)).catch(e=>alert('Could not save: '+e.message)),500);
+ if(re&&(f==='date'||f==='type'))redraw()}
+function pickDay(d){sel=sel===d?null:d;render()}
+function mv(n){cm+=n;if(cm<0){cm=11;cy--}if(cm>11){cm=0;cy++}sel=null;render()}
+function nowMonth(){const d=new Date();cy=d.getFullYear();cm=d.getMonth();sel=null;render()}
+function addRow(k){const n=new Date(),d=sel||(cy===n.getFullYear()&&cm===n.getMonth()?today():cy+'-'+pad(cm+1)+'-01');
+ const r={date:d,uid:user.uid,shared:false,by:myName(),upd:new Date().toISOString()};SETS[k].cols.forEach(c=>{if(c[0]!=='date')r[c[0]]=c[2]==='sel'?c[3][0]:c[2]==='key'?c[3][c[3].length-1]:''});db.collection(k).add(r).catch(e=>alert('Could not save: '+e.message))}
+function delRow(k,id){const r=S[k].find(x=>x.id===id);if(!confirm('Delete this row?'+(r&&r.shared?'\nIt will also be removed from the Collaboration Space.':'')))return;if(r&&r.shared)db.doc('collab/'+k+'_'+id).delete().catch(()=>{});db.doc(k+'/'+id).delete()}
+
+
+/* ---------- bullets, save progress, collaboration room ---------- */
+const tkParse=s=>String(s||'').split('\n').filter(x=>x.trim()!=='').map(l=>{let m=/^\[( |x)\]\s?(.*)$/.exec(l);if(m)return{d:m[1]==='x',t:m[2]};m=/^([☑☐])\s?(.*)$/.exec(l);return m?{d:m[1]==='☑',t:m[2]}:{d:false,t:l}});
+const tkJoin=a=>a.map(i=>'['+(i.d?'x':' ')+'] '+i.t).join('\n');
+const TF=k=>k==='plan'?'targets':'content'; /* which field holds the bullets */
+function tkWrite(k,r,a,rd,fid){const f=TF(k),v=tkJoin(a);r[f]=v;r.by=myName();clearTimeout(tm[r.id+f]);tm[r.id+f]=setTimeout(()=>db.doc(k+'/'+r.id).set({[f]:v,by:myName(),upd:new Date().toISOString()},{merge:true}).then(()=>syncCollab(k,r.id)).catch(e=>alert('Could not save: '+e.message)),500);if(rd){render();if(fid){const el=document.querySelectorAll('.tks[data-r="'+r.id+'"] input[type=text]');if(el.length)el[el.length-1].focus()}}}
+function tkSet(k,id,i,f,val){const r=S[k].find(x=>x.id===id);if(!r)return;const a=tkParse(r[TF(k)]);if(!a[i])return;a[i][f]=val;tkWrite(k,r,a,f==='d')}
+function tkAdd(k,id){const r=S[k].find(x=>x.id===id);if(!r)return;const a=tkParse(r[TF(k)]);a.push({d:false,t:''});tkWrite(k,r,a,true,true)}
+function tkDel(k,id,i){const r=S[k].find(x=>x.id===id);if(!r)return;const a=tkParse(r[TF(k)]);a.splice(i,1);tkWrite(k,r,a,true)}
+
+let tt;function toast(t,lbl,fn){const e=$('#toast');if(!e)return;e.textContent=t;e.style.pointerEvents=lbl?'auto':'none';if(lbl){const b=document.createElement('button');b.textContent=lbl;b.style.cssText='margin-left:12px;background:#fff;color:var(--btn);border:0;border-radius:999px;padding:4px 12px;font:600 13px Archivo,sans-serif;cursor:pointer';b.onclick=()=>{e.classList.remove('on');e.style.pointerEvents='none';fn()};e.appendChild(b)}e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>{e.classList.remove('on');e.style.pointerEvents='none'},lbl?6000:2600)}
+
+/* Save progress: writes every row of this list right now */
+async function saveWs(k){const rows=S[k].filter(own);if(!rows.length)return toast('Nothing to save yet.');
+ Object.values(tm).forEach(clearTimeout);const now=new Date().toISOString(),me=myName(),ops=[];
+ rows.forEach(r=>{const d={by:me,upd:now,savedAt:now};SETS[k].cols.forEach(c=>{d[c[0]]=r[c[0]]??''});if(r.typeOther)d.typeOther=r.typeOther;ops.push(b=>b.set(db.doc(k+'/'+r.id),d,{merge:true}))});
+ try{await batchRun(ops);await Promise.all(rows.filter(r=>r.shared).map(r=>syncCollab(k,r.id)));toast('Progress saved.')}catch(e){alert('Could not save: '+e.message)}}
+
+/* Share a row to the Collaboration Space */
+function collabData(k,r){return{uid:r.uid,name:myName(),src:k,rowId:r.id,date:r.date||'',type:r.type==='Others'&&r.typeOther?'Others: '+r.typeOther:(r.type||''),platform:r.platform||'',status:r.status||'',person:r.person||'',notes:(k==='plan'?r.remarks:r.notes)||'',items:r[TF(k)]||'',upd:new Date().toISOString()}}
+function syncCollab(k,id){const r=S[k].find(x=>x.id===id);if(!r||!r.shared)return Promise.resolve();return db.doc('collab/'+k+'_'+id).update(collabData(k,r)).catch(()=>{})}
+function shareCell(k,r){const c=S.collab.find(x=>x.id===k+'_'+r.id),q=`'${k}','${r.id}'`;
+ if(r.shared&&(c||!LOADED.collab))return `<span class="tag ok">${c&&c.stage==='progress'?'In progress':c?'Proposal':'Shared'}</span><div style="margin-top:6px"><button class="btn ghost sm" onclick="unshareRow(${q})">Unshare</button></div>`;
+ return `<button class="btn ghost sm" onclick="shareRow(${q})">Share</button>`}
+async function shareRow(k,id){const r=S[k].find(x=>x.id===id);if(!r)return;
+ if(!confirm('Share this with the whole team?\n\nA summary panel will appear in the Collaboration Space (Collab tab) as a proposal. Only the admin can approve it.'))return;
+ try{await db.doc('collab/'+k+'_'+id).set({...collabData(k,r),stage:'proposal',sharedAt:new Date().toISOString(),approvedBy:'',approvedAt:''});
+  r.shared=true;await db.doc(k+'/'+id).set({shared:true},{merge:true});render();toast('Shared. It is now a proposal in the Collaboration Space.','View',()=>{go('notes');scrollTo(0,0)})}catch(e){alert('Could not share: '+e.message)}}
+async function unshareRow(k,id){const c=S.collab.find(x=>x.id===k+'_'+id);
+ if(!confirm(c&&c.stage==='progress'?'This is already approved and in progress. Remove it from the Collaboration Space?':'Remove this from the Collaboration Space?'))return;
+ try{await db.doc('collab/'+k+'_'+id).delete();const r=S[k].find(x=>x.id===id);if(r)r.shared=false;await db.doc(k+'/'+id).set({shared:false},{merge:true});toast('Removed from the Collaboration Space.');render()}catch(e){alert('Could not unshare: '+e.message)}}
+function approveCollab(id){if(!isApprover())return;const now=new Date().toISOString();
+ db.doc('collab/'+id).update({stage:'progress',approvedBy:myName(),approvedAt:now}).then(()=>toast('Approved. Moved to progress mode.')).catch(e=>alert('Could not approve: '+e.message))}
+function backToProposal(id){if(!isApprover())return;if(!confirm('Move this back to the proposal stage?'))return;
+ db.doc('collab/'+id).update({stage:'proposal',approvedBy:'',approvedAt:''}).catch(e=>alert('Could not save: '+e.message))}
+
+
+/* ---------- shared links (Team Notes) ---------- */
+const openEmb={};
+const safeUrl=u=>{u=String(u||'').trim();if(!u)return '';if(!/^[a-z][a-z0-9+.-]*:/i.test(u))u='https://'+u;try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:''}catch(e){return ''}};
+const embUrl=u=>{try{const x=new URL(u),hn=x.hostname.replace(/^www\./,'');
+ if(hn==='youtube.com'&&x.pathname==='/watch'&&x.searchParams.get('v'))return 'https://www.youtube.com/embed/'+encodeURIComponent(x.searchParams.get('v'));
+ if(hn==='youtu.be'&&x.pathname.length>1)return 'https://www.youtube.com/embed/'+encodeURIComponent(x.pathname.slice(1));
+ if(hn==='drive.google.com'||hn==='docs.google.com')return u.replace(/\/(view|edit)([?#].*)?$/,'/preview');
+ return u}catch(e){return u}};
+function linkCard(n){const u=safeUrl(n.url),cur=openEmb[n.id]!==undefined?openEmb[n.id]:!!n.emb,can=isAdmin()||n.uid===user.uid;
+ return `<div class="card nc lk" style="${cur&&u?'grid-column:1/-1':''}"><b>${u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(n.label||'Open link')}</a>`:esc(n.label||'Invalid link')}</b>${can?` <button class="x1" title="Delete" onclick="delNote('${n.id}')">×</button>`:''}
+ <div class="muted" style="font-size:12px">Shared by ${esc(n.name)} · ${fmtDT(n.at)}</div>${n.text?`<p>${esc(n.text)}</p>`:''}
+ ${u?`<div class="lkb"><button class="btn ghost sm" onclick="openLink('${n.id}')">Open</button><button class="btn ghost sm" onclick="togEmb('${n.id}')">${cur?'Hide preview':'Preview'}</button><button class="btn ghost sm" onclick="copyLink('${n.id}')">Copy link</button></div>`:''}
+ ${cur&&u?`<iframe class="emb" src="${esc(embUrl(u))}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" allowfullscreen></iframe><p class="muted" style="font-size:12px;margin:6px 0 0">If the preview is blank, that site doesn’t allow embedding. Use Open.</p>`:''}</div>`}
+const lnk=id=>safeUrl((S.notes.find(x=>x.id===id)||{}).url);
+function openLink(id){const u=lnk(id);if(u)window.open(u,'_blank','noopener,noreferrer')}
+function togEmb(id){const n=S.notes.find(x=>x.id===id);if(!n)return;openEmb[id]=!(openEmb[id]!==undefined?openEmb[id]:!!n.emb);render()}
+function copyLink(id){const u=lnk(id);if(!u)return;(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>alert('Link copied.')).catch(()=>prompt('Copy this link:',u))}
+async function postLink(){const l=$('#ll').value.trim(),u=safeUrl($('#lu').value),t=$('#ln').value.trim();
+ if(!l)return alert('Please add a label.');if(!u)return alert('Please paste a full link, like https://example.com');
+ try{await db.collection('notes').add({kind:'link',uid:user.uid,name:myName(),label:l,url:u,text:t,emb:$('#le').checked,tz:TZ,at:new Date().toISOString()});pending=false;render()}catch(e){alert('Could not share: '+e.message)}}
+
+/* ---------- Excel summaries ---------- */
+function addGen(wb,name,title,subt,cols,rows,sumCols){
+ const n=cols.length,ws=wb.addWorksheet(name,{views:[{state:'frozen',ySplit:4,showGridLines:false}],properties:{tabColor:{argb:XC.pk}},pageSetup:{orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,paperSize:9}});
+ ws.columns=cols.map(c=>({width:c.w||16}));
+ for(let i=1;i<=n;i++){const a=ws.getCell(1,i);a.fill=solid(XC.dk);a.border={bottom:{style:'medium',color:{argb:XC.gd}}};ws.getCell(2,i).fill=solid(XC.zb)}
+ ws.mergeCells(1,1,1,n);ws.mergeCells(2,1,2,n);
+ let c=ws.getCell(1,1);c.value=title;c.font={name:'Georgia',size:20,bold:true,color:{argb:XC.wh}};c.alignment={vertical:'middle',horizontal:'left',indent:1};ws.getRow(1).height=44;
+ c=ws.getCell(2,1);c.value=subt;c.font={size:10,italic:true,color:{argb:XC.mu}};c.alignment={vertical:'middle',horizontal:'left',indent:1};ws.getRow(2).height=24;ws.getRow(3).height=6;
+ const hr=ws.getRow(4);hr.height=30;cols.forEach((col,i)=>{const x=hr.getCell(i+1);x.value=col.h;x.font={bold:true,size:11,color:{argb:XC.wh}};x.fill=solid(XC.pk);x.alignment={vertical:'middle',horizontal:col.t==='num'?'right':'left',indent:1};x.border=BORD});
+ rows.forEach((d,r)=>{const row=ws.getRow(5+r);cols.forEach((col,i)=>{const x=row.getCell(i+1),v=d[i];if(v!==undefined&&v!=='')x.value=v;x.font={size:11,color:{argb:XC.tx}};x.border=BORD;x.alignment={vertical:'top',wrapText:true,horizontal:col.t==='num'?'right':'left',indent:col.t==='num'?0:1};if(col.t==='num')x.numFmt=col.f||'0.00';if(r%2)x.fill=solid(XC.zb)})});
+ if(sumCols&&rows.length){const tr=ws.getRow(5+rows.length),last=4+rows.length;cols.forEach((col,i)=>{const x=tr.getCell(i+1);x.fill=solid(XC.tot);x.font={bold:true,size:11,color:{argb:XC.tx}};x.border={top:{style:'medium',color:{argb:XC.pk}},bottom:bd,left:bd,right:bd}});tr.getCell(1).value='Total';tr.getCell(1).alignment={indent:1};
+  sumCols.forEach(i=>{const L=String.fromCharCode(65+i),x=tr.getCell(i+1);x.value={formula:'SUM('+L+'5:'+L+last+')',result:rows.reduce((s,d)=>s+(+d[i]||0),0)};x.numFmt=cols[i].f||'0.00';x.alignment={horizontal:'right'}});tr.height=26}
+ if(rows.length)ws.autoFilter={from:{row:4,column:1},to:{row:4+rows.length,column:n}};return ws}
+const wkStart=ds=>{const [y,m,d]=ds.split('-').map(Number),t=new Date(Date.UTC(y,m-1,d));t.setUTCDate(t.getUTCDate()-((t.getUTCDay()+6)%7));return t.toISOString().slice(0,10)};
+const wkLbl=w=>{const a=new Date(w+'T00:00:00Z'),b=new Date(a);b.setUTCDate(b.getUTCDate()+6);const f=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'});return f(a)+' – '+f(b)+', '+b.getUTCFullYear()};
+async function attSum(mode){if(!isAdmin())return;const wb=newWb();if(!wb)return;const wk=mode==='week',g={};
+ S.att.filter(r=>r.in).forEach(r=>{const ds=dIn(r.in),w=wk?wkStart(ds):'',key=w+'|'+(r.name||''),o=g[key]||(g[key]={w,n:r.name||'',days:new Set(),rec:0,h:0,open:0});o.days.add(ds);o.rec++;o.h+=+hrs(r)||0;if(!r.out)o.open++});
+ const list=Object.values(g).sort((a,b)=>a.w.localeCompare(b.w)||a.n.localeCompare(b.n));if(!list.length)return alert('No attendance records in '+attMonth+'.');
+ const cols=(wk?[{h:'Week (Mon to Sun)',w:26}]:[]).concat([{h:'Name',w:26},{h:'Days present',w:14,t:'num',f:'0'},{h:'Records',w:11,t:'num',f:'0'},{h:'Total hours',w:13,t:'num'},{h:'Avg hours / day',w:15,t:'num'},{h:'Still clocked in',w:15,t:'num',f:'0'}]),off=wk?1:0;
+ addGen(wb,wk?'Weekly summary':'Monthly summary','TSwede Biz  ·  Attendance  ·  '+(wk?'Weekly':'Monthly')+' summary','Month '+attMonth+'  ·  Times in '+TZ+'  ·  Exported '+today()+(wk?'  ·  Weeks at the edge of the month include only this month’s days':''),cols,
+  list.map(o=>(wk?[wkLbl(o.w)]:[]).concat([o.n,o.days.size,o.rec,+o.h.toFixed(2),o.days.size?+(o.h/o.days.size).toFixed(2):0,o.open])),[off+1,off+2,off+3,off+5]);
+ await saveWb(wb,'tswede-biz-attendance-'+(wk?'weekly':'monthly')+'-'+attMonth)}
+function collabStats(c){const t=tkParse(c.items);return{t:t.length,d:t.filter(x=>x.d).length,lines:t.map(x=>(x.d?'☑ ':'☐ ')+x.t).join('\n')}}
+async function collabXlsx(){const list=[...S.collab];if(!list.length)return alert('Nothing has been shared to the Collaboration Space yet.');const wb=newWb();if(!wb)return;
+ const N=(h,w,f)=>({h,w,t:'num',f:f||'0'}),g={},sub='Collaboration Space  ·  Exported '+today()+'  ·  Times in '+TZ;
+ list.forEach(c=>{const s=collabStats(c),n=c.name||'Unknown',o=g[n]||(g[n]={p:0,g:0,t:0,d:0});if(c.stage==='progress')o.g++;else o.p++;o.t+=s.t;o.d+=s.d});
+ addGen(wb,'Overview','TSwede Biz  ·  Collaboration Space',sub,[{h:'Team member',w:26},N('Proposals',13),N('In progress',13),N('Total shared',14),N('Bullets total',14),N('Bullets done',14),N('Done %',11,'0%')],
+  Object.keys(g).sort().map(n=>{const o=g[n];return [n,o.p,o.g,o.p+o.g,o.t,o.d,o.t?o.d/o.t:0]}),[1,2,3,4,5]);
+ const det=(name,prog)=>{const cols=[{h:'Team member',w:24},{h:'Source',w:14},{h:'Date',w:12},{h:'Type',w:18},{h:'Platform',w:13},{h:'Status',w:13},{h:'Key person',w:14},{h:'Target / Bullets',w:46},N('Bullets done',13),N('Bullets total',13),N('Progress %',12,'0%'),{h:'Notes',w:34},{h:'Shared on',w:18}];
+  if(prog)cols.push({h:'Approved by',w:32});
+  const rows=list.filter(c=>(c.stage==='progress')===prog).sort((a,b)=>(a.name||'').localeCompare(b.name||'')||(a.date||'').localeCompare(b.date||'')).map(c=>{const s=collabStats(c),r=[c.name||'',c.src==='ice'?'Ice Whispers':'Planner',c.date||'',c.type||'',c.platform||'',c.status||'',c.person||'',s.lines,s.d,s.t,s.t?s.d/s.t:0,c.notes||'',c.sharedAt?fmtDT(c.sharedAt):''];if(prog)r.push(c.approvedBy?c.approvedBy+' · '+fmtDT(c.approvedAt):'');return r});
+  addGen(wb,name,'TSwede Biz  ·  '+name,sub,cols,rows,[8,9])};
+ det('Proposals',false);det('In progress',true);
+ await saveWb(wb,'tswede-biz-collaboration-space-'+today())}
+
+const rulesTxt=()=>{const f=a=>a.map(e=>"        '"+e+"'").join(",\n"),em=f(ADMIN_EMAILS),ap=f(APPROVER_EMAILS);return `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function verified() { return signedIn() && request.auth.token.email_verified == true; }
+    function isAdmin() {
+      return verified() && request.auth.token.email.lower() in [
+${em}
+      ];
+    }
+
+    // Only these four can approve in the Collaboration Space.
+    function isApprover() {
+      return verified() && request.auth.token.email.lower() in [
+${ap}
+      ];
+    }
+
+    match /employees/{id} {
+      allow get: if signedIn();
+      allow list: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if isAdmin();
+      allow update: if isAdmin()
+        || (signedIn()
+            && resource.data.get('uid', '') == ''
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uid', 'email', 'claimedAt'])
+            && (resource.data.get('invite', '') == ''
+                || resource.data.get('invite', '') == request.auth.token.email.lower()))
+        || (signedIn()
+            && resource.data.get('uid', '') == request.auth.uid
+            && request.resource.data.uid == ''
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uid', 'email']));
+      allow delete: if isAdmin();
+    }
+
+    match /users/{uid} {
+      allow read: if request.auth.uid == uid || isAdmin();
+      allow create: if request.auth.uid == uid && verified();
+      allow update: if request.auth.uid == uid || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Planner: private. Only the owner can read their own rows.
+    match /plan/{id} {
+      allow read: if signedIn() && resource.data.uid == request.auth.uid;
+      allow create: if verified() && (isAdmin() || request.resource.data.uid == request.auth.uid);
+      allow update: if isAdmin()
+        || (verified() && resource.data.uid == request.auth.uid && request.resource.data.uid == resource.data.uid);
+      allow delete: if isAdmin() || (verified() && resource.data.uid == request.auth.uid);
+    }
+
+    // Ice Whispers: private. Only the owner can read their own rows.
+    match /ice/{id} {
+      allow read: if signedIn() && resource.data.uid == request.auth.uid;
+      allow create: if verified() && (isAdmin() || request.resource.data.uid == request.auth.uid);
+      allow update: if isAdmin()
+        || (verified() && resource.data.uid == request.auth.uid && request.resource.data.uid == resource.data.uid);
+      allow delete: if isAdmin() || (verified() && resource.data.uid == request.auth.uid);
+    }
+
+    // Collaboration Space: rows people chose to share. Everyone verified can read.
+    // ONLY approvers (Ms Tracy, Josie + the two contact@ emails) can change the stage or remove others' shares.
+    match /collab/{id} {
+      allow read: if verified();
+      allow create: if verified()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.stage == 'proposal';
+      allow update: if isApprover()
+        || (verified()
+            && resource.data.uid == request.auth.uid
+            && request.resource.data.uid == resource.data.uid
+            && request.resource.data.stage == resource.data.stage
+            && request.resource.data.approvedBy == resource.data.approvedBy
+            && request.resource.data.approvedAt == resource.data.approvedAt);
+      allow delete: if isApprover() || (verified() && resource.data.uid == request.auth.uid);
+    }
+
+    match /notes/{id} {
+      allow read: if verified();
+      allow create: if verified() && request.resource.data.uid == request.auth.uid;
+      allow update: if false;
+      allow delete: if isAdmin() || (verified() && resource.data.uid == request.auth.uid);
+    }
+
+    match /attendance/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if verified() && request.resource.data.uid == request.auth.uid;
+      allow update: if isAdmin()
+        || (verified()
+            && resource.data.uid == request.auth.uid
+            && resource.data.out == ''
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['out', 'outTz']));
+      allow delete: if isAdmin();
+    }
+  }
+}`};
+function copyRules(){const t=rulesTxt();(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Full rules copied. In Firebase: Rules → select all → paste → Publish.')).catch(()=>prompt('Copy these rules:',t))}
+let openC={};
+function togC(u){openC[u]=!openC[u];render()}
+function collabDetail(uid){const adm=isApprover(),l=S.collab.filter(c=>c.uid===uid).sort((a,b)=>(a.stage==='progress')-(b.stage==='progress')||(b.sharedAt||'').localeCompare(a.sharedAt||''));
+ const row=c=>{const s=collabStats(c),pg=c.stage==='progress',pct=s.t?Math.round(s.d/s.t*100):0,meta=[c.type,c.platform,c.status].filter(Boolean).join(' · ');
+  return `<tr><td>${c.src==='ice'?'Ice Whispers':'Planner'}</td><td style="white-space:nowrap">${esc(c.date||'')}</td><td>${esc(meta)||'<span class="muted">–</span>'}</td>
+  <td style="min-width:220px">${s.t?`<ul class="cl" style="margin:0">${tkParse(c.items).map(x=>`<li class="${x.d?'dn':''}"><span>${x.d?'☑':'☐'}</span><span style="color:inherit">${esc(x.t)}</span></li>`).join('')}</ul><div class="pb" title="${pct}%"><i style="width:${pct}%"></i></div><div class="muted" style="font-size:12px;margin-top:4px">${s.d} / ${s.t} done · ${pct}%</div>`:'<span class="muted">No bullets yet</span>'}</td>
+  <td style="white-space:pre-wrap;font-size:13px">${esc(c.notes||'')}</td>
+  <td><span class="tag${pg?' ok':''}">${pg?'In progress':'Proposal'}</span>${pg&&c.approvedBy?`<div class="muted" style="font-size:11px;margin-top:4px">${esc(c.approvedBy)} · ${fmtDT(c.approvedAt)}</div>`:''}</td>
+  ${adm?`<td style="white-space:nowrap">${pg?`<button class="btn ghost sm" onclick="backToProposal('${c.id}')">Back to proposal</button>`:`<button class="btn sm" onclick="approveCollab('${c.id}')">Approve</button>`}</td>`:''}</tr>`};
+ return `<div class="wrap" style="background:var(--in);border:1px solid var(--line);border-radius:8px;padding:4px 10px"><table style="min-width:760px"><thead><tr><th>Source</th><th>Date</th><th>Details</th><th>Target / Bullets</th><th>Notes</th><th>Stage</th>${adm?'<th></th>':''}</tr></thead><tbody>${l.map(row).join('')}</tbody></table></div>`}
+function collabHTML(){const adm=isApprover(),g={};
+ S.collab.forEach(c=>{const o=g[c.uid]||(g[c.uid]={uid:c.uid,name:c.name||'Unknown',p:0,g:0,last:''});if(c.stage==='progress')o.g++;else o.p++;if((c.sharedAt||'')>o.last)o.last=c.sharedAt||''});
+ const people=Object.values(g).sort((a,b)=>b.p-a.p||b.last.localeCompare(a.last)),
+ bad=COLLABERR?`<div class="hint" style="color:var(--pk);margin:0 0 14px"><b>Couldn’t load the Collaboration Space (${esc(COLLABERR)}).</b> Firebase doesn’t have the collab rules yet. ${isAdmin()?'Press Copy full rules, open Firebase Console → Firestore Database → Rules, select everything, paste, then press Publish.':'Please tell an admin.'}${isAdmin()?` <button class="btn sm" style="margin-left:6px" onclick="copyRules()">Copy full rules</button>`:''}</div>`:'',
+ rows=people.map(o=>{const op=!!openC[o.uid];return `<tr><td><b>${esc(o.name)}</b>${o.uid===user.uid?' <span class="muted" style="font-size:12px">(you)</span>':''}</td><td>${o.p+o.g}</td><td>${o.p?`<span class="tag ok">${o.p} awaiting</span>`:'<span class="muted">0</span>'}</td><td>${o.g}</td><td class="muted" style="font-size:12px">${o.last?fmtDT(o.last):''}</td><td style="white-space:nowrap"><button class="btn ghost sm" onclick="togC('${o.uid}')">${op?'Close':'Open'}</button></td></tr>`+(op?`<tr><td colspan="6" style="padding:0 0 14px">${collabDetail(o.uid)}</td></tr>`:'')}).join('')
+  ||`<tr><td colspan="6" class="empty">${LOADED.collab?'Nothing shared yet. Press Share on a row in Planner or Ice Whispers.':'Loading…'}</td></tr>`;
+ return `<h2 class="h2" style="margin-top:8px">Collaboration Space</h2>
+ <div class="card glow">${bad}<div class="bar" style="margin:0 0 6px"><span class="sp"></span><button class="btn ghost sm" onclick="collabXlsx()">Download Excel summary</button></div>
+ <div class="wrap"><table style="min-width:640px"><thead><tr><th>Name</th><th>Total shares</th><th>Awaiting approval</th><th>In progress</th><th>Last shared</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+ <div class="tips">${TIP(I_UP,'Shared by name','Rows people share from Planner or Ice Whispers appear here.')}${TIP(I_EYE,'Open to review','Press Open on a name to see their proposals and progress.')}${TIP(I_OK,'Approval',adm?'Press Approve to move a proposal into progress mode.':'Only approvers can approve a proposal.')}</div></div>`}
+
+/* ---------- team notes ---------- */
+function notesHTML(){const latest={};S.notes.filter(n=>n.kind!=='link').forEach(n=>{if(!latest[n.uid])latest[n.uid]=n});
+ const can=n=>isAdmin()||n.uid===user.uid;
+ return `<p class="eye">Collab</p><h1>What’s everyone <em>up to</em>?</h1>
+ ${collabHTML()}<h2 class="h2">Team notes</h2>
+ <div class="card"><textarea id="nt" rows="3" placeholder="Leave a note: what you’re working on, hand-offs, anything the team should know…"></textarea>
+ <div class="bar" style="margin:12px 0 0"><span class="sp"></span><button class="btn" onclick="postNote()">Post note</button></div></div>
+ <h2 class="h2">Shared links</h2>
+ <div class="card"><div class="lkf"><input id="ll" placeholder="Label (e.g. Brand kit)" autocomplete="off"><input id="lu" placeholder="Paste the link (https://…)" autocomplete="off"></div>
+ <textarea id="ln" rows="2" placeholder="Notes on this link: what it is, what to check…" style="margin-top:8px"></textarea>
+ <div class="bar" style="margin:12px 0 0"><label class="muted" style="font-size:13px;display:flex;gap:6px;align-items:center"><input type="checkbox" id="le" style="width:auto"> Show embedded preview by default</label><span class="sp"></span><button class="btn" onclick="postLink()">Share link</button></div>
+ <p class="muted" style="font-size:12px;margin:8px 0 0">Everyone signed in to the team can see shared links. The web address stays hidden behind the label.</p></div>
+ <div class="grid" style="margin-top:12px">${S.notes.filter(n=>n.kind==='link').map(linkCard).join('')||'<p class="muted">No shared links yet.</p>'}</div>
+ <h2 class="h2">Latest from each person</h2>
+ <div class="grid">${Object.values(latest).map(n=>`<div class="card nc"><b>${esc(n.name)}</b> <span class="muted" style="font-size:12px">· ${fmtDT(n.at)}</span>${can(n)?` <button class="x1" title="Delete" onclick="delNote('${n.id}')">×</button>`:''}<p>${esc(n.text)}</p></div>`).join('')||'<p class="muted">No notes yet.</p>'}</div>`}
+async function postNote(){const t=$('#nt').value.trim();if(!t)return;
+ try{await db.collection('notes').add({uid:user.uid,name:myName(),text:t,tz:TZ,at:new Date().toISOString()});$('#nt').value='';pending=false;render()}catch(e){alert('Could not post: '+e.message)}}
+function delNote(id){if(confirm('Delete this note?'))db.doc('notes/'+id).delete()}
+
+/* ---------- admin ---------- */
+function adminHTML(){const rows=[...S.att].sort((a,b)=>b.in.localeCompare(a.in)),emps=[...S.emps].sort((a,b)=>a.id.localeCompare(b.id)),dn=c=>(DEPTS.find(d=>d[0]===c)||[0,c||''])[1],tot=rows.reduce((s,r)=>s+(+hrs(r)||0),0).toFixed(2),miss=STARTERS.map((n,i)=>BIZ+'2025'+'01'+pad(i+1)).filter(id=>!S.emps.some(e=>e.id===id));
+ return `<p class="eye">Admin · private</p><h1>Attendance <em>log</em>.</h1>
+ <div class="bar"><input id="am" type="month" value="${esc(attMonth)}" style="width:auto" onchange="setAttMonth(this.value)"><button class="btn ghost sm" onclick="expo('att','xlsx')">Download Excel</button><button class="btn ghost sm" onclick="attSum('week')">Weekly summary</button><button class="btn ghost sm" onclick="attSum('month')">Monthly summary</button><button class="btn ghost sm" onclick="copyRules()">Copy Firestore rules</button><span class="sp"></span><span class="muted">${rows.length} record${rows.length===1?'':'s'} · ${tot} hours · times shown in ${esc(TZ)}.</span></div>
+ <div class="card wrap"><table><thead><tr><th>Name</th><th>Date</th><th>Time in</th><th>Time out</th><th>Hours</th><th>Their local time</th><th></th></tr></thead><tbody>
+ ${rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${dIn(r.in)}</td><td>${fmtT(r.in)}</td><td>${r.out?fmtT(r.out):'<span class="muted">still in</span>'}</td><td>${hrs(r)}</td><td class="muted">${fmtT(r.in,r.tz)}${r.out?' – '+fmtT(r.out,r.outTz||r.tz):''} · ${esc((r.tz||'').replace(/_/g,' '))}</td><td style="white-space:nowrap"><button class="btn ghost sm" onclick="editAtt('${r.id}')">Edit</button> <button title="Delete" onclick="delAtt('${r.id}')">×</button></td></tr>`).join('')||`<tr><td colspan="7" class="empty">${LOADED.att?'No attendance recorded this month.':'Loading…'}</td></tr>`}
+ </tbody></table></div>
+ <h2 class="h2">Employee IDs</h2>
+ <p class="muted" style="margin:0 0 12px;font-size:13px">Staff need their ID to sign in. Add their email so only that email can claim the ID.</p>
+ <div class="card">
+ <div class="addf"><input id="en" placeholder="Employee name" autocomplete="off"><input id="em" type="email" placeholder="Email (recommended)" autocomplete="off"><input id="ey" inputmode="numeric" maxlength="4" value="${new Date().getFullYear()}" placeholder="Year"><select id="ed">${DEPTS.map(d=>`<option value="${d[0]}">${d[0]} · ${esc(d[1])}</option>`).join('')}</select><button class="btn" onclick="addEmp()">Generate ID</button></div>
+ ${emps.length&&LOADED.emps&&miss.length?`<p class="hint" style="margin:0 0 12px"><button class="btn sm" onclick="seedEmps()">Add missing starter IDs (${miss.join(', ')})</button></p>`:''}
+ <div class="wrap"><table style="min-width:640px"><thead><tr><th>Employee ID</th><th>Name</th><th>Department</th><th>Status</th><th></th></tr></thead><tbody>
+ ${emps.map(e=>`<tr><td><b class="eid">${esc(e.id)}</b></td><td>${esc(e.name)}</td><td class="muted">${esc(e.dept||'')} · ${esc(dn(e.dept))}</td><td>${e.uid?`<span class="tag ok">Registered</span> <span class="muted" style="font-size:12px">${esc(e.email||'')}</span>`:`<span class="tag">Not used yet</span>${e.invite?` <span class="muted" style="font-size:12px">reserved for ${esc(e.invite)}</span>`:''}`}</td><td style="white-space:nowrap"><button class="btn ghost sm" onclick="editEmp('${e.id}')">Edit</button> ${e.uid?`<button class="btn ghost sm" onclick="relEmp('${e.id}')">Release</button> `:''}<button title="Delete" onclick="delEmp('${e.id}')">×</button></td></tr>`).join('')||`<tr><td colspan="5" class="empty">${LOADED.emps?`No Employee IDs yet.<br><br><button class="btn sm" onclick="seedEmps()">Add starter IDs (${STARTERS.map(s=>s.replace('Ms. ','')).join(', ')})</button>`:'Loading…'}</td></tr>`}
+ </tbody></table></div></div>
+ <h2 class="h2">Accounts</h2>
+ <div class="card wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Employee ID</th></tr></thead><tbody>
+ ${S.users.map(u=>{const e=S.emps.find(x=>x.uid===u.id);return `<tr><td>${esc(u.name)}</td><td class="muted">${esc(u.email)}</td><td>${e?esc(e.id):'<span class="muted">–</span>'}</td></tr>`}).join('')||'<tr><td colspan="3" class="empty">No accounts yet.</td></tr>'}
+ </tbody></table></div>`}
+function delAtt(id){if(confirm('Delete this record?'))db.doc('attendance/'+id).delete()}
+function editAtt(id){const r=S.att.find(x=>x.id===id);if(!r)return;
+ const a=prompt('Time in ('+TZ+'), format YYYY-MM-DD HH:MM',wall(r.in));if(a===null)return;
+ const b=prompt('Time out ('+TZ+'), format YYYY-MM-DD HH:MM. Leave empty if still clocked in.',r.out?wall(r.out):'');if(b===null)return;
+ const di=fromZone(a,TZ),dout=b.trim()?fromZone(b,TZ):null;
+ if(!di||(b.trim()&&!dout)||(dout&&dout<=di))return alert('Please use the format YYYY-MM-DD HH:MM, with time out after time in.');
+ db.doc('attendance/'+id).update({in:di.toISOString(),out:dout?dout.toISOString():'',outTz:dout?(r.outTz||r.tz||TZ):''}).catch(e=>alert('Could not save: '+e.message))}
+/* creates the ID only if it does not exist yet, so two admins can never overwrite each other */
+async function createEmp(id,data){const ref=db.doc('employees/'+id);return db.runTransaction(async t=>{const s=await t.get(ref);if(s.exists)return false;t.set(ref,data);return true})}
+async function seedEmps(){if(!LOADED.emps)return;const y='2025',d='01';
+ try{for(let i=0;i<STARTERS.length;i++)await createEmp(BIZ+y+d+pad(i+1),{name:STARTERS[i],year:y,dept:d,uid:'',email:'',invite:'',created:new Date().toISOString()})}catch(e){alert('Could not save: '+e.message)}}
+async function addEmp(){const n=$('#en').value.trim(),y=$('#ey').value.trim(),d=$('#ed').value,em=($('#em').value||'').trim().toLowerCase();
+ if(!n||!/^\d{4}$/.test(y))return alert('Please enter the name and a 4-digit year.');
+ if(em&&!/^\S+@\S+\.\S+$/.test(em))return alert('That email doesn’t look right.');
+ const pre=BIZ+y+d;let max=0;S.emps.forEach(e=>{if(e.id.startsWith(pre)&&e.id.length===pre.length+2)max=Math.max(max,+e.id.slice(-2)||0)});
+ try{for(let i=0;i<20;i++){max++;if(max>99)return alert('That year and department is full (99 IDs).');
+   if(await createEmp(pre+pad(max),{name:n,year:y,dept:d,uid:'',email:'',invite:em,created:new Date().toISOString()})){pending=false;return render()}}
+  alert('Could not find a free ID. Please try again.')}catch(e){alert('Could not save: '+e.message)}}
+function delEmp(id){if(confirm('Delete '+id+'? This person will no longer be able to sign in.'))db.doc('employees/'+id).delete()}
+function relEmp(id){if(confirm('Release '+id+' so it can be used by a different account?'))db.doc('employees/'+id).update({uid:'',email:''}).catch(e=>alert(e.message))}
+
+/* Edit an Employee ID record (ID, name, department, reserved email). Admin emails only; firestore.rules must also allow it. */
+async function editEmp(id){if(!isAdmin())return;const e=S.emps.find(x=>x.id===id);if(!e)return;
+ const nid=prompt('Employee ID (letters and numbers, 8 to 20 characters)',e.id);if(nid===null)return;
+ const nm=prompt('Name',e.name||'');if(nm===null)return;
+ const dp=prompt('Department code ('+DEPTS.map(d=>d[0]+' = '+d[1]).join(', ')+')',e.dept||'');if(dp===null)return;
+ let inv=e.invite||'';
+ if(!e.uid){const em=prompt('Reserved email (leave empty for none)',inv);if(em===null)return;inv=em.trim().toLowerCase();if(inv&&!/^\S+@\S+\.\S+$/.test(inv))return alert('That email doesn’t look right.')}
+ const newId=nid.toUpperCase().replace(/\s+/g,''),name=nm.trim(),dept=dp.trim();
+ if(!/^[A-Z0-9]{8,20}$/.test(newId))return alert('The Employee ID must be 8 to 20 letters or numbers.');
+ if(!name)return alert('Please enter a name.');
+ if(!DEPTS.some(d=>d[0]===dept))return alert('Unknown department code.');
+ if(newId!==id&&!confirm('Change '+id+' to '+newId+'? '+(e.uid?'This person must use the new ID the next time they sign in.':'Anyone holding the old ID must use the new one.')))return;
+ try{await db.runTransaction(async t=>{const oldRef=db.doc('employees/'+id),newRef=db.doc('employees/'+newId);
+   const s=await t.get(oldRef);if(!s.exists)throw 'This record no longer exists.';
+   let taken=false;if(newId!==id){taken=(await t.get(newRef)).exists}
+   if(taken)throw 'That Employee ID is already used.';
+   const m=newId.match(/^[A-Z]{3}(\d{4})/),d=Object.assign({},s.data(),{name,dept,invite:inv,year:m?m[1]:(s.data().year||'')});
+   if(newId===id)t.update(oldRef,{name:d.name,dept:d.dept,invite:d.invite,year:d.year});
+   else{t.set(newRef,d);t.delete(oldRef)}})}
+ catch(x){alert(typeof x==='string'?x:'Could not save: '+(x&&x.message||x))}}
+
+/* ---------- background music (your own file, plays on a loop, stays on while you switch tabs) ---------- */
+let mAud=null,mUrl='';
+function musicUI(){const b=$('#mu');if(!b)return;const on=mAud&&!mAud.paused;b.textContent=on?'❚❚':'♪';$('#mv').style.display=mAud?'':'none'}
+function musicBtn(){if(!mAud)return $('#mf').click();if(mAud.paused)mAud.play().catch(()=>{});else mAud.pause();musicUI()}
+function musicVol(v){if(mAud)mAud.volume=+v}
+$('#mf').onchange=e=>{const f=e.target.files[0];if(!f)return;if(mUrl)URL.revokeObjectURL(mUrl);mUrl=URL.createObjectURL(f);
+ if(!mAud){mAud=new Audio();mAud.loop=true;mAud.volume=+$('#mv').value;mAud.addEventListener('play',musicUI);mAud.addEventListener('pause',musicUI)}
+ mAud.src=mUrl;mAud.play().catch(()=>{});$('#mu').title='Playing: '+f.name+' (click to pause / play)';musicUI();e.target.value=''};
+
+/* ---------- theme / zone ---------- */
+function toggleTheme(){const r=document.documentElement,cur=r.dataset.theme||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'),n=cur==='light'?'dark':'light';r.dataset.theme=n;LS.set('tsw_theme',n)}
+function setTz(v){TZ=v;LS.set('tsw_tz',v);if(isAdmin()&&listening)listenAtt();render()}
+
+/* ---------- export (styled Excel) ---------- */
+const XC={dk:'FF1D131A',pk:'FFC8185A',gd:'FFD9B45A',ln:'FFDCCDBD',zb:'FFF8F1E9',tx:'FF2B1B20',mu:'FF7B6A66',wh:'FFFFFFFF',tot:'FFF3E6C3'};
+const solid=c=>({type:'pattern',pattern:'solid',fgColor:{argb:c}});
+const bd={style:'thin',color:{argb:XC.ln}},BORD={top:bd,left:bd,bottom:bd,right:bd};
+const D=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s||'');return m?new Date(Date.UTC(+m[1],+m[2]-1,+m[3])):(s||'')};
+const isAtt=k=>k==='att'||k==='mine';
+function colsFor(k){
+ if(isAtt(k))return [{h:'Name',w:24},{h:'Date',w:22,t:'date'},{h:'Time In',w:12,t:'time'},{h:'Time Out',w:12,t:'time'},{h:'Hours',w:10,t:'num'},{h:'Employee Time Zone',w:22},{h:'Shown In',w:20},{h:'In (UTC)',w:26},{h:'Out (UTC)',w:26}];
+ return SETS[k].cols.map(c=>({h:c[1],t:c[2]==='date'?'date':'text',w:c[2]==='date'?22:c[2]==='sel'?18:c[2]==='tasks'?42:32,list:(c[2]==='sel'||c[2]==='key')?c[3]:null}))}
+function rowsFor(k){
+ if(isAtt(k))return (k==='att'?S.att:S.myAtt).slice().sort((a,b)=>a.in.localeCompare(b.in)).map(r=>[r.name||'',D(dIn(r.in)),wallFrac(r.in),r.out?wallFrac(r.out):'',r.out?+hrs(r):'',r.tz||'',TZ,r.in,r.out||'']);
+ return S[k].filter(own).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(r=>SETS[k].cols.map(c=>c[2]==='date'?D(r[c[0]]):c[2]==='tasks'?tkParse(r[c[0]]).map(x=>(x.d?'☑ ':'☐ ')+x.t).join('\n'):(r[c[0]]||'')))}
+function addSheet(wb,k,tpl){
+ const att=isAtt(k),name=att?'Attendance':SETS[k].label,cols=colsFor(k),rows=tpl?[]:rowsFor(k),n=cols.length,total=tpl?60:att?rows.length:Math.max(rows.length,15);
+ const title='TSwede Biz  ·  '+name+(tpl?'  ·  Template':'');
+ const subt=tpl?'Fill in from row 5  ·  Dates like 2026-11-07 or real Excel dates  ·  Use the dropdowns  ·  Upload this file back with “Upload Excel”':'Exported '+today()+'  ·  Times shown in '+TZ+(k==='mine'?'  ·  '+myName():k==='att'?'  ·  '+attMonth:att?'':'  ·  '+myName());
+ const ws=wb.addWorksheet(name,{views:[{state:'frozen',ySplit:4,showGridLines:false}],properties:{tabColor:{argb:XC.pk}},pageSetup:{orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,paperSize:9}});
+ ws.columns=cols.map(c=>({width:c.w}));
+ for(let i=1;i<=n;i++){const a=ws.getCell(1,i);a.fill=solid(XC.dk);a.border={bottom:{style:'medium',color:{argb:XC.gd}}};const b=ws.getCell(2,i);b.fill=solid(XC.zb)}
+ ws.mergeCells(1,1,1,n);ws.mergeCells(2,1,2,n);
+ let c=ws.getCell(1,1);c.value=title;c.font={name:'Georgia',size:20,bold:true,color:{argb:XC.wh}};c.alignment={vertical:'middle',horizontal:'left',indent:1};ws.getRow(1).height=44;
+ c=ws.getCell(2,1);c.value=subt;c.font={size:10,italic:true,color:{argb:XC.mu}};c.alignment={vertical:'middle',horizontal:'left',indent:1};ws.getRow(2).height=24;
+ ws.getRow(3).height=6;
+ const hr=ws.getRow(4);hr.height=30;
+ cols.forEach((col,i)=>{const x=hr.getCell(i+1);x.value=col.h;x.font={bold:true,size:11,color:{argb:XC.wh}};x.fill=solid(XC.pk);x.alignment={vertical:'middle',horizontal:col.t==='num'?'right':'left',indent:1};x.border=BORD});
+ for(let r=0;r<total;r++){const row=ws.getRow(5+r),d=rows[r]||[];
+  cols.forEach((col,i)=>{const x=row.getCell(i+1),v=d[i];
+   if(v!==undefined&&v!=='')x.value=v;
+   x.font={size:11,color:{argb:XC.tx}};x.border=BORD;
+   x.alignment={vertical:'top',wrapText:true,horizontal:col.t==='num'?'right':'left',indent:col.t==='num'?0:1};
+   if(col.t==='date')x.numFmt='ddd, mmm d, yyyy';
+   if(col.t==='num')x.numFmt='0.00';
+   if(col.t==='time')x.numFmt='h:mm AM/PM';
+   if(r%2)x.fill=solid(XC.zb);
+   if(col.list)x.dataValidation={type:'list',allowBlank:true,formulae:['"'+col.list.join(',')+'"']}})}
+ if(att&&!tpl&&rows.length){const tr=ws.getRow(5+rows.length),last=4+rows.length,sum=rows.reduce((s,r)=>s+(+r[4]||0),0);
+  cols.forEach((col,i)=>{const x=tr.getCell(i+1);x.fill=solid(XC.tot);x.font={bold:true,size:11,color:{argb:XC.tx}};x.border={top:{style:'medium',color:{argb:XC.pk}},bottom:bd,left:bd,right:bd}});
+  tr.getCell(1).value='Total hours';tr.getCell(1).alignment={indent:1};
+  tr.getCell(5).value={formula:'SUM(E5:E'+last+')',result:sum};tr.getCell(5).numFmt='0.00';tr.getCell(5).alignment={horizontal:'right'};tr.height=26}
+ ws.autoFilter={from:{row:4,column:1},to:{row:4+Math.max(total,1),column:n}};
+ return ws}
+async function saveWb(wb,nm){const buf=await wb.xlsx.writeBuffer();dl(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),nm+'.xlsx')}
+function newWb(){if(typeof ExcelJS==='undefined'){alert('The Excel tools are still loading. Please try again in a moment.');return null}const wb=new ExcelJS.Workbook();wb.creator='TSwede Biz';wb.created=new Date();return wb}
+function dl(blob,fn){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+async function expo(k,f){const nm='tswede-biz-'+k+'-'+today();
+ if(f==='png')return pngExport(k,nm);
+ const wb=newWb();if(!wb)return;
+ (isAtt(k)?[k]:[k,k==='plan'?'ice':'plan']).forEach(x=>addSheet(wb,x,false));
+ await saveWb(wb,nm)}
+/* PNG: draw a clean read-only copy of the table (html2canvas draws inputs and dropdowns badly) */
+async function pngExport(k,nm){const S_=SETS[k],rows=viewRows(k),box=document.createElement('div');
+ box.style.cssText='position:fixed;left:-99999px;top:0;width:1100px;padding:16px;background:'+getComputedStyle(document.body).backgroundColor;
+ box.innerHTML=`<div class="card"><table style="min-width:0"><thead><tr>${S_.cols.map(c=>`<th>${c[1]}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${S_.cols.map(c=>`<td style="white-space:pre-wrap">${esc(c[2]==='tasks'?tkParse(r[c[0]]).map(x=>(x.d?'☑ ':'☐ ')+x.t).join('\n'):(r[c[0]]||''))}</td>`).join('')}</tr>`).join('')||`<tr><td class="empty" colspan="${S_.cols.length}">Nothing planned.</td></tr>`}</tbody></table></div>`;
+ document.body.appendChild(box);const hz=document.documentElement.style.zoom;document.documentElement.style.zoom='1';
+ try{const c=await html2canvas(box,{backgroundColor:null,scale:2});c.toBlob(b=>dl(b,nm+'.png'))}catch(e){alert('Could not make the image.')}finally{document.documentElement.style.zoom=hz;box.remove()}}
+async function tmpl(k){const wb=newWb();if(!wb)return;addSheet(wb,k,true);await saveWb(wb,'tswede-biz-'+k+'-template')}
+
+/* ---------- import ---------- */
+function pick(k){imp=k;$('#file').click()}
+function nd(v){if(typeof v==='number'&&isFinite(v)&&v>20000&&XLSX.SSF&&XLSX.SSF.parse_date_code){const p=XLSX.SSF.parse_date_code(v);if(p)return p.y+'-'+pad(p.m)+'-'+pad(p.d)}if(v instanceof Date){return new Date(v.getTime()+432e5).toISOString().slice(0,10)}v=String(v??'').trim();if(/^\d{4}-\d{2}-\d{2}/.test(v))return v.slice(0,10);const d=new Date(v);return isNaN(d)?'':iso(d)}
+async function batchRun(list){for(let i=0;i<list.length;i+=400){const b=db.batch();list.slice(i,i+400).forEach(f=>f(b));await b.commit()}}
+$('#file').onchange=async e=>{const f=e.target.files[0];if(!f)return;
+ try{const wb=/\.csv$/i.test(f.name)?XLSX.read(await f.text(),{type:'string'}):XLSX.read(await f.arrayBuffer(),{type:'array'});
+  const S_=SETS[imp],N=s=>String(s??'').toLowerCase().replace(/[^a-z]/g,''),names=c=>[N(c[1]),N(c[0]),...(c[4]||[])];
+  const aoa=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:'',raw:true});
+  /* the styled template has a title banner above the header, so look for the header row */
+  const hi=aoa.findIndex(r=>S_.cols.filter(c=>r.some(x=>names(c).includes(N(x)))).length>=2);
+  if(hi<0){alert('No matching columns found. Use the Excel template button for the right column names.');return}
+  const hd=aoa[hi];
+  const out=aoa.slice(hi+1).map(row=>{const r={};
+   S_.cols.forEach(c=>{const ix=hd.findIndex(x=>names(c).includes(N(x)));let v=ix<0?'':(row[ix]??'');v=c[2]==='date'?nd(v):String(v).trim();if(c[2]==='sel'&&!v)v=c[3][0];r[c[0]]=v});return r})
+   .filter(r=>S_.cols.some(c=>c[2]!=='sel'&&c[0]!=='date'&&r[c[0]])||r.date);
+  if(!out.length){alert('No rows found under the header. Add some rows and try again.');return}
+  const cur=S[imp].filter(own),rep=cur.length?confirm('Replace this '+S_.label+' list with this file?\n\nOK = Replace   Cancel = Add to existing'):false;
+  const ops=[];if(rep){cur.forEach(r=>ops.push(b=>b.delete(db.doc(imp+'/'+r.id))));await Promise.all(cur.filter(r=>r.shared).map(r=>db.doc('collab/'+imp+'_'+r.id).delete().catch(()=>{})))}
+  out.forEach(r=>ops.push(b=>b.set(db.collection(imp).doc(),{...r,uid:user.uid,by:myName(),upd:new Date().toISOString()})));
+  await batchRun(ops);
+  const d=out.find(r=>r.date);if(d){cy=+d.date.slice(0,4);cm=+d.date.slice(5,7)-1}sel=null;render();
+ }catch(err){alert('Sorry, that file could not be read or saved.')}
+ e.target.value=''};
+
+/* ---------- start ---------- */
+{const t=LS.get('tsw_theme','');if(t)document.documentElement.dataset.theme=t}
+render();
+if(CONFIGURED)loadFb().then(ok=>{if(!ok){FBFAIL=true;render();return}firebase.initializeApp(CFG);fa=firebase.auth();db=firebase.firestore();fa.onAuthStateChanged(u=>{if(!gate)boot(u)})});
+</script>
+</body>
+</html>
